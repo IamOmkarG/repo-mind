@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 
+from backend.api.routes import router
+
+
 app = FastAPI(title="RepoMind")
 
 
-@app.get("/")
-def health_check():
-    return {"status": "RepoMind is running"}
+app.include_router(router)
