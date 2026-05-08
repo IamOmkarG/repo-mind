@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+backend/storage/vector_store.json
+temp_repo/
