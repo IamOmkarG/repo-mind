@@ -45,12 +45,13 @@ def ask_repository(request: AskRequest):
 
     documents = load_documents()
 
-    answer = answer_repository_question(
+    result = answer_repository_question(
         query=request.question,
         documents=documents
     )
 
     return {
         "question": request.question,
-        "answer": answer
+        "answer": result["answer"],
+        "sources": result["sources"]
     }

@@ -1,6 +1,8 @@
 from openai import OpenAI
 
-from backend.vectorstore.search import semantic_search
+from backend.vectorstore.search import (
+    semantic_search
+)
 
 
 client = OpenAI()
@@ -43,4 +45,17 @@ Question:
         ]
     )
 
-    return response.choices[0].message.content
+    answer = response.choices[0].message.content
+
+    sources = [
+        {
+            "path": result["path"],
+            "score": round(result["score"], 4)
+        }
+        for result in search_results
+    ]
+
+    return {
+        "answer": answer,
+        "sources": sources
+    }
