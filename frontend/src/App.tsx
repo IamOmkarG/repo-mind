@@ -64,48 +64,89 @@ export default function App() {
   async function askQuestion() {
 
     if (!question.trim()) return
-
+  
     const userMessage: Message = {
       role: "user",
       content: question
     }
-
+  
     setMessages((prev) => [
       ...prev,
       userMessage
     ])
-
+  
     const currentQuestion = question
-
+  
     setQuestion("")
-
+  
     try {
-
+  
       setAsking(true)
-
-      const response = await API.post("/ask", {
-        question: currentQuestion
-      })
-
+  
+      const response = await fetch(
+        "http://localhost:8000/ask-stream",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            question: currentQuestion
+          })
+        }
+      )
+  
+      if (!response.body) {
+  
+        throw new Error("No response body")
+      }
+  
+      const reader = response.body.getReader()
+  
+      const decoder = new TextDecoder()
+  
+      let streamedText = ""
+  
       const assistantMessage: Message = {
         role: "assistant",
-        content: response.data.answer,
-        sources: response.data.sources
+        content: ""
       }
-
+  
       setMessages((prev) => [
         ...prev,
         assistantMessage
       ])
-
+  
+      while (true) {
+  
+        const { done, value } =
+          await reader.read()
+  
+        if (done) break
+  
+        streamedText += decoder.decode(value)
+  
+        setMessages((prev) => {
+  
+          const updated = [...prev]
+  
+          updated[updated.length - 1] = {
+            role: "assistant",
+            content: streamedText
+          }
+  
+          return updated
+        })
+      }
+  
     } catch (error) {
-
+  
       console.error(error)
-
+  
       toast.error("Failed to ask question")
-
+  
     } finally {
-
+  
       setAsking(false)
     }
   }

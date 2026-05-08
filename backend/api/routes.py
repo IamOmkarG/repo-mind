@@ -1,4 +1,10 @@
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
+
+from backend.services.rag_service import (
+    answer_repository_question,
+    stream_repository_answer
+)
 
 from backend.vectorstore.store import load_documents
 
@@ -55,3 +61,18 @@ def ask_repository(request: AskRequest):
         "answer": result["answer"],
         "sources": result["sources"]
     }
+
+@router.post("/ask-stream")
+def ask_repository_stream(request: AskRequest):
+
+    documents = load_documents()
+
+    stream = stream_repository_answer(
+        query=request.question,
+        documents=documents
+    )
+
+    return StreamingResponse(
+        stream,
+        media_type="text/plain"
+    )

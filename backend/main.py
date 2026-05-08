@@ -19,4 +19,12 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+def root():
+
+    return {
+        "message": "RepoMind API is running"
+    }
+
+
 app.include_router(router)
