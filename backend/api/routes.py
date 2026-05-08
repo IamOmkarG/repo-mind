@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from backend.ingestion.repo_loader import load_repository
+from backend.vectorstore.store import load_documents
 from backend.embeddings.chunker import chunk_text
 from backend.embeddings.embedder import generate_embedding
 from backend.services.rag_service import answer_repository_question
@@ -9,13 +9,7 @@ from backend.models.request_models import AskRequest
 
 router = APIRouter()
 
-
-# Load repository files
-files = load_repository(".")
-
-
-# Build searchable document store
-documents = []
+documents = load_documents()
 
 
 for file in files:
