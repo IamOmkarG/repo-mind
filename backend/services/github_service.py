@@ -1,28 +1,43 @@
+import os
 import shutil
-import subprocess
+import zipfile
+import requests
 
-from pathlib import Path
 
-
-TEMP_REPO_PATH = Path("temp_repo")
+TEMP_REPO_PATH = "temp_repo"
+ZIP_PATH = "repo.zip"
 
 
 def clone_repository(repo_url: str):
 
-    # Remove old repo if exists
-    if TEMP_REPO_PATH.exists():
-
+    if os.path.exists(TEMP_REPO_PATH):
         shutil.rmtree(TEMP_REPO_PATH)
 
-    # Clone repository
-    subprocess.run(
-        [
-            "git",
-            "clone",
-            repo_url,
-            str(TEMP_REPO_PATH)
-        ],
-        check=True
-    )
+    if os.path.exists(ZIP_PATH):
+        os.remove(ZIP_PATH)
+
+    zip_url = repo_url.rstrip("/") + "/archive/refs/heads/master.zip"
+
+    response = requests.get(zip_url)
+
+    if response.status_code != 200:
+        zip_url = repo_url.rstrip("/") + "/archive/refs/heads/main.zip"
+        response = requests.get(zip_url)
+
+    response.raise_for_status()
+
+    with open(ZIP_PATH, "wb") as file:
+        file.write(response.content)
+
+    with zipfile.ZipFile(ZIP_PATH, "r") as zip_ref:
+        zip_ref.extractall(".")
+
+    extracted_folder = [
+        name
+        for name in os.listdir(".")
+        if name.startswith(repo_url.split("/")[-1] + "-")
+    ][0]
+
+    os.rename(extracted_folder, TEMP_REPO_PATH)
 
     return TEMP_REPO_PATH
