@@ -1,14 +1,16 @@
 import json
+import os
 
-from pathlib import Path
 
-
-VECTOR_STORE_PATH = Path(
-    "backend/storage/vector_store.json"
-)
+VECTOR_STORE_PATH = "backend/storage/vector_store.json"
 
 
 def save_documents(documents):
+
+    os.makedirs(
+        "backend/storage",
+        exist_ok=True
+    )
 
     with open(VECTOR_STORE_PATH, "w") as file:
 
@@ -17,7 +19,7 @@ def save_documents(documents):
 
 def load_documents():
 
-    if not VECTOR_STORE_PATH.exists():
+    if not os.path.exists(VECTOR_STORE_PATH):
 
         return []
 
