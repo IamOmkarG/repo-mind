@@ -84,7 +84,7 @@ export default function App() {
       setAsking(true)
   
       const response = await fetch(
-        "http://localhost:8000/ask-stream",
+        `${import.meta.env.VITE_API_URL}/ask-stream`,
         {
           method: "POST",
           headers: {
